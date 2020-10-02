@@ -2,7 +2,7 @@ const knex = require('knex')
 const app = require('../src/app')
 const helpers = require('./test-helpers')
 
-describe('Things Endpoints', function() {
+describe('Things Endpoints', function () {
   let db
 
   const {
@@ -25,7 +25,7 @@ describe('Things Endpoints', function() {
 
   afterEach('cleanup', () => helpers.cleanTables(db))
 
-  describe('Protected endpoints', () => {
+  describe.only('Protected endpoints', () => {
 
     beforeEach('insert Things', () => {
       helpers.seedThingsTables(
@@ -49,34 +49,35 @@ describe('Things Endpoints', function() {
 
     protectedEndpoints.forEach(endpoint => {
       describe(endpoint.name, () => {
-        it(`responds 401 'Missing basic token' when no basic token`, () => { 
-            return supertest(app)
+        it(`responds 401 'Missing bearer token' when no bearer token`, () => {
+          return supertest(app)
             .get(endpoint.path)
-            .expect(401, { error: `Missing basic token` })
+            .expect(401, { error: `Missing bearer token` })
         })
-  
-        it(`responds 401 'Unauthorized request' when no credentials in token`, () => {
+
+        it(`responds 401 'Unauthorized request' when invalid JWT secret`, () => {
           const userNoCreds = { user_name: '', password: '' }
           return supertest(app)
             .get(endpoint.path)
             .set('Authorization', helpers.makeAuthHeader(userNoCreds))
             .expect(401, { error: `Unauthorized request` })
         })
-  
-        it(`responds 401 'Unauthorized request' when invalid user`, () => {
-          const userInvalidCreds = { user_name: 'user-not', password: 'existy' }
+
+        it.skip(`responds 401 'Unauthorized request' when invalid user`, () => {
+          const validUser = testUsers[0]
+          const invalidSecret = 'bad-secret'
           return supertest(app)
-          .get(endpoint.path)
-          .set('Authorization', helpers.makeAuthHeader(userInvalidCreds))
-          .expect(401, { error: `Unauthorized request` })
+            .get(endpoint.path)
+            .set('Authorization', helpers.makeAuthHeader(validUser, invalidSecret))
+            .expect(401, { error: `Unauthorized request` })
         })
-  
-        it(`responds 401 'Unauthorized request' when invalid password`, () => {
+
+        it.skip(`responds 401 'Unauthorized request' when invalid password`, () => {
           const userInvalidPass = { user_name: testUsers[0].user_name, password: 'wrong' }
           return supertest(app)
-          .get(endpoint.path)
-          .set('Authorization', helpers.makeAuthHeader(userInvalidPass))
-          .expect(401, { error: `Unauthorized request` })
+            .get(endpoint.path)
+            .set('Authorization', helpers.makeAuthHeader(userInvalidPass))
+            .expect(401, { error: `Unauthorized request` })
         })
       })
     })
@@ -144,9 +145,9 @@ describe('Things Endpoints', function() {
 
   describe(`GET /api/things/:thing_id`, () => {
     context(`Given no things`, () => {
-      beforeEach(() => 
-      helpers.seedUsers(db, testUsers)
-        )
+      beforeEach(() =>
+        helpers.seedUsers(db, testUsers)
+      )
       it(`responds with 404`, () => {
         const thingId = 123456
         return supertest(app)
