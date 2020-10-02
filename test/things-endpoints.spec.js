@@ -2,7 +2,7 @@ const knex = require('knex')
 const app = require('../src/app')
 const helpers = require('./test-helpers')
 
-describe('Things Endpoints', function () {
+describe.only('Things Endpoints', function () {
   let db
 
   const {
@@ -25,7 +25,7 @@ describe('Things Endpoints', function () {
 
   afterEach('cleanup', () => helpers.cleanTables(db))
 
-  describe.only('Protected endpoints', () => {
+  describe('Protected endpoints', () => {
 
     beforeEach('insert Things', () => {
       helpers.seedThingsTables(
@@ -63,20 +63,12 @@ describe('Things Endpoints', function () {
             .expect(401, { error: `Unauthorized request` })
         })
 
-        it.skip(`responds 401 'Unauthorized request' when invalid user`, () => {
+        it(`responds 401 'Unauthorized request' when invalid user`, () => {
           const validUser = testUsers[0]
           const invalidSecret = 'bad-secret'
           return supertest(app)
             .get(endpoint.path)
             .set('Authorization', helpers.makeAuthHeader(validUser, invalidSecret))
-            .expect(401, { error: `Unauthorized request` })
-        })
-
-        it.skip(`responds 401 'Unauthorized request' when invalid password`, () => {
-          const userInvalidPass = { user_name: testUsers[0].user_name, password: 'wrong' }
-          return supertest(app)
-            .get(endpoint.path)
-            .set('Authorization', helpers.makeAuthHeader(userInvalidPass))
             .expect(401, { error: `Unauthorized request` })
         })
       })

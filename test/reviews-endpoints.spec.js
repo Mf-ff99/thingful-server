@@ -2,7 +2,7 @@ const knex = require('knex')
 const app = require('../src/app')
 const helpers = require('./test-helpers')
 
-describe('Reviews Endpoints', function() {
+describe.only('Reviews Endpoints', function() {
   let db
 
   const {
@@ -33,8 +33,8 @@ describe('Reviews Endpoints', function() {
       )
     )
 
-    it(`responds 401 ‘Unauthorized request’ when invalid password`, () => {
-      const userInvalidPass = { user_name: testUsers[0].user_name, password: 'wrong' }
+    it(`responds 401 ‘Unauthorized request’ when invalid token`, () => {
+      const userInvalidPass = { user_name: 'invalid name', id: 0 }
         return supertest(app)
           .post(`/api/reviews`)
           .set(`Authorization`, helpers.makeAuthHeader(userInvalidPass))

@@ -227,11 +227,10 @@ function cleanTables(db) {
   return db.transaction(trx => 
     trx.raw(
     `TRUNCATE
-      thingful_things,
-      thingful_users,
-      thingful_reviews
-      `
+      thingful_reviews`
   )
+  .then(() => trx.raw(`TRUNCATE thingful_things CASCADE`))
+  .then(() => trx.raw(`TRUNCATE thingful_users CASCADE`))
   .then(() => 
     Promise.all([
       trx.raw(`ALTER SEQUENCE thingful_things_id_seq minvalue 0 START WITH 1`),
